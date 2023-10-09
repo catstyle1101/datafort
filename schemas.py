@@ -1,23 +1,6 @@
-import json
-
 from pydantic import BaseModel
 
-celsius = float
 kelvin = float
-
-
-class WeatherResponse(BaseModel):
-    name: str
-    temp: celsius
-    temp_max: celsius
-    temp_min: celsius
-    pressure: int
-    humidity: int
-    wind_speed: float
-    wind_deg: int
-    clouds_percent: int
-    lat: float
-    lon: float
 
 
 class Coord(BaseModel):
@@ -54,11 +37,11 @@ class Clouds(BaseModel):
 
 
 class Sys(BaseModel):
-    type: int
-    id: int
-    country: str
-    sunrise: int
-    sunset: int
+    type: int = None
+    id: int = None
+    country: str = None
+    sunrise: int = None
+    sunset: int = None
 
 
 class WeatherOpenWeatherResponse(BaseModel):
@@ -70,9 +53,9 @@ class WeatherOpenWeatherResponse(BaseModel):
     wind: Wind
     clouds: Clouds
     dt: int
-    sys: Sys
     timezone: int
     id: int
     name: str
     cod: int
+    sys: Sys = None
     rain: dict[str, float] = None

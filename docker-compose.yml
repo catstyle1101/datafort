@@ -1,0 +1,30 @@
+version: '3.3'
+services:
+
+  celery_beat:
+    build: &parser
+      context: .
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - celery_worker
+    volumes:
+      - ./db:/app/db
+    command: celery -A celery_worker beat --loglevel=INFO
+
+  redis:
+    image: redis:latest
+    restart: always
+    ports:
+      - "6379:6379"
+
+  celery_worker:
+    build: *parser
+    env_file:
+      - .env
+    depends_on:
+      - redis
+    volumes:
+      - ./db:/app/db
+    command: celery -A celery_worker worker -P threads --without-gossip --loglevel=INFO

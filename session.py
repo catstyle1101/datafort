@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+
 from requests import Session
 
 
@@ -8,5 +9,5 @@ class BaseSession(ABC):
         pass
 
 
-class RequestSession(Session, BaseSession):
+class RequestsSession(Session, BaseSession):
     pass
