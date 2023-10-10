@@ -9,6 +9,23 @@ Base = declarative_base()
 
 
 class City(Base):
+    """
+    Represents a city with associated weather data.
+
+    Attributes:
+        id (uuid4): A unique identifier for the city.
+        name (str): The name of the city.
+        lat (float): The latitude of the city's location.
+        lon (float): The longitude of the city's location.
+        population (int): The population of the city.
+        weather (relationship): A one-to-many relationship with weather
+            records.
+
+    Methods:
+        validate(): Validates the integrity of city attributes.
+        __repr__(): Returns a string representation of the city.
+
+    """
     __tablename__ = 'cities'
 
     id = Column(
@@ -40,6 +57,26 @@ class City(Base):
 
 
 class Weather(Base):
+    """
+    Represents weather data for a specific city at a particular time.
+
+    Attributes:
+        id (uuid4): A unique identifier for the weather record.
+        temperature (float): The temperature in degrees Kelvin.
+        weather (str): The weather condition (e.g., 'Rain', 'Clear').
+        weather_description (str): A description of the weather conditions.
+        pressure (int): Atmospheric pressure in hPa (hectopascals).
+        humidity (int): Relative humidity as a percentage.
+        wind_speed (float): Wind speed in meters per second.
+        wind_direction (float): Wind direction in degrees.
+        clouds (int): Cloud cover in percentage.
+        created_at (datetime): The timestamp when the weather record was
+            created.
+        city_id (str): The identifier of the associated city.
+
+    Methods:
+        validate(): Validates the integrity of weather data attributes.
+    """
     __tablename__ = 'weather'
 
     id = Column(

@@ -13,38 +13,94 @@ from schemas import WeatherOpenWeatherResponse
 
 
 class BaseModelRepository(ABC):
+    """
+    Abstract base repository contract for interacting with database models.
+
+    This class defines the interface for repository classes that interact
+        with database models.
+
+    """
     @abstractmethod
     def get_all(self):
+        """
+        Retrieve all records from the associated database table.
+
+        Returns:
+            list: A list of records from the database table.
+        """
         pass
 
     @abstractmethod
     def write_one(self, obj):
+        """
+        Retrieve all records from the associated database table.
+
+        Returns:
+            list: A list of records from the database table.
+        """
         pass
 
 
 class TableMaker:
+    """
+    A utility class for creating database tables based on SQLAlchemy models.
+
+    Args:
+        database_url (str): The URL of the database where tables
+            will be created.
+        base (declarative_base): The declarative base instance
+            containing model definitions.
+    """
     def __init__(self, datbase_url: str, base: Base):
+        """
+        Initialize the TableMaker.
+
+        Args:
+            database_url (str): The URL of the database where
+                tables will be created.
+            base (declarative_base): The declarative base instance
+                containing model definitions.
+        """
         self.engine = create_engine(datbase_url)
         self.base = base
 
     def create_tables(self):
+        """
+        Create database tables based on the provided SQLAlchemy models.
+        """
         self.base.metadata.create_all(self.engine)
 
 
 class Database:
+    """Create database session and engine in object."""
     def __init__(self, database_url: str) -> None:
         self.engine = create_engine(database_url, pool_pre_ping=True)
         self.session = sessionmaker(bind=self.engine)
 
 
 class CityRepository(Database, BaseModelRepository):
+    """Repository for interacting with City objects in the database."""
+
     def get_all(self) -> list[City]:
+        """
+        Get a list of all cities in the database, ordered by population in
+        descending order.
+
+        Returns:
+            list[City]: A list of City objects.
+        """
         with self.session() as session:
             results = session.query(City).order_by(
                 City.population.desc()).limit(CITIES_COUNT).all()
         return results
 
     def write_one(self, city: City) -> None:
+        """
+        Write a single city to the database.
+
+        Args:
+            city (City): The City object to be written to the database.
+        """
         new_city = City(
             name=city.name,
             lat=city.lat,
@@ -61,8 +117,14 @@ class CityRepository(Database, BaseModelRepository):
         logging.info(f'City {new_city} added.')
 
     def fill_database(self) -> None:
-        """Fill database from cities.py file
-        (50 most populated cities in the world).
+        """
+        Fill the database with cities from a predefined list.
+
+        Note:
+            This method is used to populate the database with cities.
+
+        Raises:
+            Exception: An error occurred if there was a problem adding a city.
         """
         with self.session() as session:
             for name, lat, lon, population in CITIES:
@@ -79,7 +141,19 @@ class CityRepository(Database, BaseModelRepository):
 
 
 class WeatherRepository(Database, BaseModelRepository):
+    """Repository for interacting with Weather objects in the database."""
+
     def get_all(self, city: City) -> list[Weather]:
+        """
+        Get a list of all weather of city in the database,
+        ordered by population in descending order.
+
+        Args:
+            city (City): The City object to be written to the database.
+
+        Returns:
+            list[Weather]: A list of Weather objects.
+        """
         with self.session() as session:
             results = session.query(Weather).where(city_id=city.id).order_by(
                 Weather.created_at.desc()).all()
@@ -87,6 +161,13 @@ class WeatherRepository(Database, BaseModelRepository):
 
     def write_one(
             self, weather: WeatherOpenWeatherResponse, city: City) -> None:
+        """
+        Write a single weather to the database.
+
+        Args:
+            weather (WeatherOpenWeatherResponse): The Weather object.
+            city (City): The City object to be written to the database.
+        """
         new_weather = Weather(
             id=str(uuid.uuid4()),
             temperature=weather.main.temp,
