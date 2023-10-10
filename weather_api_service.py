@@ -1,14 +1,11 @@
+from abc import ABC, abstractmethod
 import json
 import logging
-from abc import ABC, abstractmethod
-
-from config import API_KEY, WEATHER_API_URL
-from errors import APIKeyNotFoundError
-from session import RequestsSession
+from requests import Session
 
 
 class BaseWeatherParser(ABC):
-    def __init__(self, session: RequestsSession):
+    def __init__(self, session: Session):
         self.session = session
 
     @abstractmethod
@@ -17,11 +14,14 @@ class BaseWeatherParser(ABC):
 
 
 class OpenWeatherParser(BaseWeatherParser):
-    def parse_api(self, lat: float, lon: float) -> dict | None:
-        if API_KEY is None:
-            logging.error('API KEY is not set in .env file')
-            raise APIKeyNotFoundError
-        url = WEATHER_API_URL.format(lat=lat, lon=lon, api_key=API_KEY)
+    WEATHER_API_URL = (
+        'https://api.openweathermap.org/data/2.5/weather?'
+        'lat={lat}&lon={lon}&appid={api_key}'
+    )
+
+    def parse_api(self, api_key: str, lat: float, lon: float) -> dict | None:
+        url = self.WEATHER_API_URL.format(lat=lat, lon=lon, api_key=api_key)
+        logging.debug(url)
         try:
             return self.session.get(url).json()
         except json.JSONDecodeError as e:

@@ -1,3 +1,3 @@
-from .database import SQLite
+from .database import CityRepository, TableMaker, WeatherRepository
 
-__all__ = [SQLite]
+__all__ = [CityRepository, TableMaker, WeatherRepository]
