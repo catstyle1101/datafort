@@ -49,3 +49,7 @@ def parse_weather():
     logging.info(
         'Information gathered. Pause on: 1 hour'
     )
+
+
+if __name__ == '__main__':
+    parse_weather()

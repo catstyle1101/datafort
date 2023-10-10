@@ -30,7 +30,8 @@ class BaseWeatherParser(ABC):
         from a specific weather API.
 
         Returns:
-            dict | None: A dictionary containing weather data, or None if parsing fails.
+            dict | None: A dictionary containing weather data, or None
+            if parsing fails.
 
         """
         pass

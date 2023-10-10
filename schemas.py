@@ -1,5 +1,6 @@
 from typing import Optional
-from pydantic import BaseModel
+from typing_extensions import Annotated
+from pydantic import BaseModel, Field
 
 kelvin = float
 
@@ -13,8 +14,8 @@ class Coord(BaseModel):
         lon (float): The longitude of the location.
         lat (float): The latitude of the location.
     """
-    lon: float
-    lat: float
+    lat: Annotated[float, Field(ge=-90, le=90)]
+    lon: Annotated[float, Field(ge=-180, le=180)]
 
 
 class Weather(BaseModel):
@@ -29,9 +30,9 @@ class Weather(BaseModel):
 
     """
     id: int
-    main: str
-    description: str
-    icon: str
+    main: Annotated[str, Field(max_length=100)]
+    description: Annotated[str, Field(max_length=100)]
+    icon: Annotated[str, Field(max_length=10)]
 
 
 class MainWeather(BaseModel):
@@ -50,14 +51,14 @@ class MainWeather(BaseModel):
         grnd_level (Optional[int]): Atmospheric pressure at ground level
             in hPa.
     """
-    temp: Optional[kelvin] = None
-    feels_like: Optional[kelvin] = None
-    temp_min: Optional[kelvin] = None
-    temp_max: Optional[kelvin] = None
-    pressure: Optional[int] = None
-    humidity: Optional[int] = None
-    sea_level: Optional[int] = None
-    grnd_level: Optional[int] = None
+    temp: Optional[Annotated[kelvin, Field(ge=0, le=400)]] = None
+    feels_like: Optional[Annotated[kelvin, Field(ge=0, le=400)]] = None
+    temp_min: Optional[Annotated[kelvin, Field(ge=0, le=400)]] = None
+    temp_max: Optional[Annotated[kelvin, Field(ge=0, le=400)]] = None
+    pressure: Optional[Annotated[int, Field(ge=0, le=1500)]] = None
+    humidity: Optional[Annotated[int, Field(ge=0, le=100)]] = None
+    sea_level: Optional[Annotated[int, Field(ge=0, le=10000)]] = None
+    grnd_level: Optional[Annotated[int, Field(ge=0, le=10000)]] = None
 
 
 class Wind(BaseModel):
@@ -69,9 +70,9 @@ class Wind(BaseModel):
         deg (int): Wind direction in degrees.
         gust (Optional[float]): Wind gust speed in meters per second (m/s).
     """
-    speed: float
-    deg: int
-    gust: Optional[float] = None
+    speed: Annotated[float, Field(ge=0, le=1000)]
+    deg: Annotated[float, Field(ge=0, le=360)]
+    gust: Optional[Annotated[float, Field(ge=0, le=1000)]] = None
 
 
 class Clouds(BaseModel):
@@ -81,7 +82,7 @@ class Clouds(BaseModel):
     Attributes:
         all (int): Cloud cover as a percentage.
     """
-    all: int
+    all: Annotated[int, Field(ge=0, le=100)]
 
 
 class Sys(BaseModel):
@@ -97,9 +98,9 @@ class Sys(BaseModel):
     """
     type: Optional[int] = None
     id: Optional[int] = None
-    country: Optional[str] = None
-    sunrise: Optional[int] = None
-    sunset: Optional[int] = None
+    country: Optional[Annotated[str, Field(max_length=10)]] = None
+    sunrise: Optional[Annotated[int, Field(ge=0)]] = None
+    sunset: Optional[Annotated[int, Field(ge=0)]] = None
 
 
 class WeatherOpenWeatherResponse(BaseModel):
@@ -126,15 +127,15 @@ class WeatherOpenWeatherResponse(BaseModel):
     """
     coord: Coord
     weather: list[Weather]
-    base: str
+    base: Annotated[str, Field(max_length=100)]
     main: MainWeather
-    visibility: int
+    visibility: Annotated[int, Field(ge=0, le=10000)]
     wind: Wind
     clouds: Clouds
-    dt: int
+    dt: Annotated[int, Field(ge=0)]
     timezone: int
     id: int
-    name: str
-    cod: int
+    name: Annotated[str, Field(max_length=100)]
+    cod: Annotated[int, Field(ge=0, le=1000)]
     sys: Optional[Sys] = None
     rain: Optional[dict[str, float]] = None
