@@ -1,5 +1,20 @@
-version: '3.3'
+version: '3.9'
 services:
+
+  db:
+    image: postgres:13.0-alpine
+    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d ${POSTGRES_DB}", "-U ${PGUSER}"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+    ports:
+      - "5432:5432"
 
   celery_beat:
     build: &parser
@@ -7,11 +22,9 @@ services:
     env_file:
       - .env
     depends_on:
-      - redis
       - celery_worker
-    volumes:
-      - ./db:/app/db
-    command: celery -A celery_worker beat --loglevel=INFO
+
+    command: celery -A celery_worker beat
 
   redis:
     image: redis:latest
@@ -24,7 +37,10 @@ services:
     env_file:
       - .env
     depends_on:
-      - redis
-    volumes:
-      - ./db:/app/db
-    command: celery -A celery_worker worker -P threads --without-gossip --loglevel=INFO
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    command: celery -A celery_worker worker -P threads --without-gossip
+volumes:
+  postgres_data:

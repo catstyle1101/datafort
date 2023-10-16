@@ -1,3 +1,4 @@
+import csv
 import logging
 import uuid
 from abc import ABC, abstractmethod
@@ -6,8 +7,7 @@ from datetime import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from .cities import CITIES
-from config import CITIES_COUNT
+from config import CITIES_COUNT, CHUNK_SIZE
 from models import Base, City, Weather
 from schemas import WeatherOpenWeatherResponse
 
@@ -118,7 +118,7 @@ class CityRepository(Database, BaseModelRepository):
 
     def fill_database(self) -> None:
         """
-        Fill the database with cities from a predefined list.
+        Fill the database with cities from a predefined list by chunks.
 
         Note:
             This method is used to populate the database with cities.
@@ -126,18 +126,21 @@ class CityRepository(Database, BaseModelRepository):
         Raises:
             Exception: An error occurred if there was a problem adding a city.
         """
-        with self.session() as session:
-            for name, lat, lon, population in CITIES:
-                new_city = City(
-                    name=name,
-                    lat=lat,
-                    lon=lon,
-                    population=population,
-                    id=str(uuid.uuid4())
-                )
-                session.add(new_city)
-                session.commit()
-        logging.info(f'Filled {len(CITIES)} cities to db.')
+        with open('cities.csv', 'r') as f:
+            reader = csv.DictReader(f)
+            chunk = []
+            for city in reader:
+                chunk.append(City(**city, id=str(uuid.uuid4())))
+                if len(chunk) >= CHUNK_SIZE:
+                    with self.session() as session:
+                        session.add_all(chunk)
+                        session.commit()
+                    chunk = []
+            if chunk:
+                with self.session() as session:
+                    session.add_all(chunk)
+                    session.commit()
+        logging.info('Filled cities to db.')
 
 
 class WeatherRepository(Database, BaseModelRepository):
