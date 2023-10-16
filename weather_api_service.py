@@ -71,7 +71,7 @@ class OpenWeatherParser(BaseWeatherParser):
                 raise ClientError(result)
             if 500 <= result.status_code < 600:
                 raise ServerError(result)
-            return result.status_code
+            return result.json()
         except json.JSONDecodeError as e:
             logging.error('Server response invalid')
             raise e
