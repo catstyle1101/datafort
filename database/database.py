@@ -126,7 +126,7 @@ class CityRepository(Database, BaseModelRepository):
         Raises:
             Exception: An error occurred if there was a problem adding a city.
         """
-        with open('cities.csv', 'r') as f:
+        with open('csv/cities.csv', 'r') as f:
             reader = csv.DictReader(f)
             chunk = []
             for city in reader:

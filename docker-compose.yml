@@ -23,7 +23,8 @@ services:
       - .env
     depends_on:
       - celery_worker
-
+    volumes:
+      - ./csv/:/app/csv/
     command: celery -A celery_worker beat
 
   redis:
@@ -41,6 +42,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+    volumes:
+      - ./csv/:/app/csv/
     command: celery -A celery_worker worker -P threads --without-gossip
 volumes:
   postgres_data:

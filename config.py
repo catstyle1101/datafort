@@ -1,7 +1,7 @@
 import logging
 import os
 
-db_user = os.environ.get('POSTGRES_USER', 'postgres')
+db_user = os.environ.get('PGUSER', 'postgres')
 db_password = os.environ.get('POSTGRES_PASSWORD', 'postgres')
 db_host = os.environ.get('DB_HOST', 'db')
 db_port = os.environ.get('DB_PORT', '5432')
