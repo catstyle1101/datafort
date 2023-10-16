@@ -5,6 +5,7 @@ from config import DATABASE_URL, LOGGING_FORMAT, API_KEY, LOGGING_LEVEL
 from database import CityRepository, TableMaker, WeatherRepository
 from errors import APIKeyNotFoundError
 from requests import Session
+from requests.adapters import HTTPAdapter, Retry
 from models import Base
 from schemas import WeatherOpenWeatherResponse
 from weather_api_service import OpenWeatherParser
@@ -42,10 +43,21 @@ def parse_weather():
         city_repo.fill_database()
         cities = city_repo.get_all()
     for city in cities:
-        parser = OpenWeatherParser(session=Session())
-        weather = WeatherOpenWeatherResponse(
-            **parser.parse_api(api_key=API_KEY, lat=city.lat, lon=city.lon))
-        weather_repo.write_one(weather=weather, city=city)
+        session = Session()
+        retries = Retry(
+            total=5,
+            backoff_factor=0.1,
+            status_forcelist=[500, 502, 503, 504]
+        )
+        session.mount('https://', HTTPAdapter(max_retries=retries))
+        parser = OpenWeatherParser(session=session)
+        try:
+            weather = WeatherOpenWeatherResponse(
+                **parser.parse_api(
+                    api_key=API_KEY, lat=city.lat, lon=city.lon))
+            weather_repo.write_one(weather=weather, city=city)
+        except Exception as e:
+            logging.error(e)
     logging.info(
         'Information gathered. Pause on: 1 hour'
     )

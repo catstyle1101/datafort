@@ -3,6 +3,8 @@ import json
 import logging
 from requests import Session
 
+from errors import ClientError, ServerError
+
 
 class BaseWeatherParser(ABC):
     """
@@ -64,7 +66,12 @@ class OpenWeatherParser(BaseWeatherParser):
         url = self.WEATHER_API_URL.format(lat=lat, lon=lon, api_key=api_key)
         logging.debug(url)
         try:
-            return self.session.get(url).json()
+            result = self.session.get(url)
+            if 400 <= result.status_code < 500:
+                raise ClientError(result)
+            if 500 <= result.status_code < 600:
+                raise ServerError(result)
+            return result.status_code
         except json.JSONDecodeError as e:
             logging.error('Server response invalid')
             raise e
