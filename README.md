@@ -20,6 +20,11 @@ cp .env.example .env
 
 ```
 OPENWEATHER_API_KEY=<some_key_here>
+PGUSER=<your_username>
+POSTGRES_PASSWORD=<your_password>
+POSTGRES_DB=<your_datbase_name>
+DB_HOST=db
+DB_PORT=5432
 ```
 
 5. Запустить проект
@@ -28,7 +33,7 @@ OPENWEATHER_API_KEY=<some_key_here>
 docker compose up --build
 ```
 
-6. Через одну минуту система соберет данные с 50 гордов мира и запишет их в базу данных в папку db/db.sqlite3
+6. Через одну минуту система соберет данные с 50 гордов мира и запишет их в базу данных Postgres
 
 ## Использование и возможности
 
@@ -44,6 +49,7 @@ docker compose up --build
 - SQLAlchemy
 - Docker
 - Celery
+- PostgreSQL
 
 
 
